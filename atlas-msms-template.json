@@ -1,0 +1,474 @@
+{
+  "atlas-msms": {
+    "order": 0,
+    "template": "atlas-msm*",
+    "settings": {
+      "index": {
+        "number_of_shards": "2",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "dns": {
+        "_source": {
+          "enabled": true
+        },
+        "properties": {
+          "www_api_traceroute_v6_latest": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "prb_address_v6": {
+            "type": "ip"
+          },
+          "dst_name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "prb_address_v4": {
+            "type": "ip"
+          },
+          "prb_id": {
+            "type": "long"
+          },
+          "prb_geoloc": {
+            "type": "geo_point"
+          },
+          "error": {
+            "properties": {
+              "TUCONNECT": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "TCPREAD": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "socket": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "TU_READ_ERR": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "timeout": {
+                "type": "long"
+              }
+            }
+          },
+          "type": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "www_api_traceroute_v4_latest": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "result": {
+            "properties": {
+              "rt": {
+                "type": "float"
+              },
+              "ANCOUNT": {
+                "type": "long"
+              },
+              "answers": {
+                "type": "nested"
+              },
+              "ARCOUNT": {
+                "type": "long"
+              },
+              "QDCOUNT": {
+                "type": "long"
+              },
+              "error": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ttl": {
+                "type": "long"
+              },
+              "rtt": {
+                "type": "float"
+              },
+              "size": {
+                "type": "long"
+              },
+              "NSCOUNT": {
+                "type": "long"
+              },
+              "x": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ID": {
+                "type": "long"
+              },
+              "dup": {
+                "type": "long"
+              },
+              "abuf": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "fw": {
+            "type": "long"
+          },
+          "avg": {
+            "type": "float"
+          },
+          "min": {
+            "type": "float"
+          },
+          "msm_id": {
+            "type": "long"
+          },
+          "www_asn_v4": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "www_asn_v6": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "dst_addr": {
+            "type": "ip"
+          },
+          "from": {
+            "type": "ip"
+          },
+          "timestamp": {
+            "format": "epoch_second",
+            "type": "date"
+          },
+          "question": {
+            "properties": {
+              "Qtype": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Qname": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Qclass": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "af": {
+            "type": "long"
+          },
+          "max": {
+            "type": "float"
+          },
+          "src_addr": {
+            "type": "ip"
+          },
+          "lts": {
+            "type": "long"
+          },
+          "rcvd": {
+            "type": "long"
+          },
+          "prb_country": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "prb_asn_v4": {
+            "type": "long"
+          },
+          "www_api_traceroute_v4": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "sent": {
+            "type": "long"
+          },
+          "ttl": {
+            "type": "long"
+          },
+          "prb_asn_v6": {
+            "type": "long"
+          },
+          "www_api_traceroute_v6": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "answer": {
+            "properties": {
+              "Address": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "NegativeTtl": {
+                "type": "long"
+              },
+              "Data": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "TTL": {
+                "type": "long"
+              },
+              "RDlength": {
+                "type": "long"
+              },
+              "Name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Refresh": {
+                "type": "long"
+              },
+              "Expire": {
+                "type": "long"
+              },
+              "Serial": {
+                "type": "long"
+              },
+              "Type": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Class": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "MasterServerName": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Retry": {
+                "type": "long"
+              },
+              "MaintainerName": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "size": {
+            "type": "long"
+          },
+          "www_probe": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "prb_region": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "proto": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "msm_name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "header": {
+            "properties": {
+              "AA": {
+                "type": "boolean"
+              },
+              "CD": {
+                "type": "boolean"
+              },
+              "QR": {
+                "type": "boolean"
+              },
+              "AD": {
+                "type": "boolean"
+              },
+              "ReturnCode": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ANCOUNT": {
+                "type": "long"
+              },
+              "ARCOUNT": {
+                "type": "long"
+              },
+              "QDCOUNT": {
+                "type": "long"
+              },
+              "RA": {
+                "type": "boolean"
+              },
+              "TC": {
+                "type": "boolean"
+              },
+              "RD": {
+                "type": "boolean"
+              },
+              "NSCOUNT": {
+                "type": "long"
+              },
+              "OpCode": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                }
+              },
+              "Z": {
+                "type": "long"
+              },
+              "ID": {
+                "type": "long"
+              }
+            }
+          },
+          "prb_prefix_v4": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "step": {
+            "type": "long"
+          },
+          "prb_prefix_v6": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "dup": {
+            "type": "long"
+          }
+        }
+      }
+    },
+    "aliases": {}
+  }
+}

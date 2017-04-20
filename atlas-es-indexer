@@ -1,0 +1,195 @@
+#!/opt/atlas-es-indexer/bin/python
+import json
+import argparse
+from pprint import pprint
+from ripe.atlas.cousteau import AtlasStream
+from ripe.atlas.cousteau import ProbeRequest
+from ripe.atlas.sagan import Result
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk, streaming_bulk
+import logging
+
+logging.getLogger('requests').setLevel(logging.INFO)
+logging.basicConfig(level=logging.ERROR)
+logging.getLogger('atlas-stream').setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
+#for handler in logging.root.handlers:
+#    handler.addFilter(logging.Filter('atlas-stream'))
+
+root_server_map = {}
+root_server_map['a'] = '09'
+root_server_map['b'] = '10'
+root_server_map['c'] = '11'
+root_server_map['d'] = '12'
+root_server_map['e'] = '13'
+root_server_map['f'] = '04'
+root_server_map['g'] = '14'
+root_server_map['h'] = '15'
+root_server_map['i'] = '05'
+root_server_map['j'] = '16'
+root_server_map['k'] = '01'
+root_server_map['l'] = '08'
+root_server_map['m'] = '06'
+
+dns_msm_map = {}
+dns_msm_map['IPv4-UDP-DNS-SOA'] = '100'
+dns_msm_map['IPv4-TCP-DNS-SOA'] = '101'
+dns_msm_map['IPv6-UDP-DNS-SOA'] = '110'
+dns_msm_map['IPv6-TCP-DNS-SOA'] = '111'
+dns_msm_map['IPv4-UDP-DNS-hostname.bind'] = '103'
+dns_msm_map['IPv6-UDP-DNS-hostname.bind'] = '113'
+
+traceroute_msm_map = {}
+traceroute_msm_map['IPv4-TRACEROUTE'] = '50'
+traceroute_msm_map['IPv6-TRACEROUTE'] = '60'
+
+results = []
+chunk_size = 50
+index = ''
+doc_type = ''
+probe_map = {}
+country_map = {}
+
+country_path = '/opt/atlas-es-indexer/countries.json'
+region_path = '/opt/atlas-es-indexer/regions.json'
+
+es = Elasticsearch(['es1.log.ripe.net', 'es2.log.ripe.net'])
+
+def load_geo_meta():
+    region_map = {}
+    with open(region_path) as f:
+        for region in json.load(f):
+            region_map[region['unM49Code']] = region['wikipediaSlug']
+
+    with open(country_path) as f:
+        for country in json.load(f):
+            try:
+                country_map[country['isoTwoLetterCountryCode']] = region_map[country['region']]
+            except Exception:
+                pass
+
+def load_probe_meta():
+    # atlas-es-indexer will be a long-running process
+    # Probe status changes often but we're only interested in geolocation
+    # and network metadata
+    #
+    # Get everything, don't bother filtering
+    filters = {}
+    probes = ProbeRequest(**filters)
+    for probe in probes:
+        probe_map[probe['id']] = {}
+        probe_map[probe['id']]['prefix_v4'] = probe['prefix_v4']
+        probe_map[probe['id']]['prefix_v6'] = probe['prefix_v6']
+        probe_map[probe['id']]['asn_v4'] = probe['asn_v4']
+        probe_map[probe['id']]['asn_v6'] = probe['asn_v6']
+        try:
+            probe_map[probe['id']]['address_v4'] = probe['address_v4']
+        except Exception:
+            pass
+        try:
+            probe_map[probe['id']]['address_v6'] = probe['address_v6']
+        except Exception:
+            pass
+        try:
+            probe_map[probe['id']]['geoloc'] = probe['geometry']['coordinates']
+            probe_map[probe['id']]['country'] = probe['country_code'].upper()
+            probe_map[probe['id']]['region'] = country_map[probe['country_code'].upper()]
+        except Exception:
+            pass
+
+def on_result_response(*args):
+    global index
+    global doc_type
+    result = args[0]
+    parsed_result = Result.get(result, on_error="Result.ACTION_IGNORE", on_malformation="Result.ACTION_IGNORE")
+    if result['from'] == '':
+        result['from'] = None
+    # Flatten answer
+    try:
+        result['answer'] = parsed_result.responses[0].abuf.answers[0].raw_data
+        result['header'] = parsed_result.responses[0].abuf.header.raw_data
+        result['question'] = parsed_result.responses[0].abuf.questions[0].raw_data
+    except IndexError as e:
+        pass
+
+    # Remove dup fields
+    try:
+        for field in ['abuf', 'answers', 'QDCOUNT', 'NSCOUNT', 'ID', 'ARCOUNT', 'ANCOUNT']:
+            result['result'].pop(field, None)
+    except KeyError as e:
+        pass
+
+    # Flatten probe metadata into result
+    try:
+        for k,v in probe_map[result['prb_id']].items():
+             result['prb_' + k] = v
+    except Exception:
+        pass
+
+    # Decorate result with direct link to probe page and stat view of ASN
+    try:
+        result['www_probe'] = 'https://atlas.ripe.net/probes/{}/'.format(str(result['prb_id']))
+    except Exception:
+        pass
+
+    try:
+        if result['prb_asn_v4']:
+            result['www_asn_v4'] = 'https://stat.ripe.net/AS{}'.format(str(result['prb_asn_v4']))
+            result['www_api_traceroute_v4_latest'] = 'https://atlas.ripe.net/api/v2/measurements/{}/latest/?probe_ids={}'.format(traceroute_msm_map['IPv4-TRACEROUTE'] + str(result['msm_id'])[-2:], str(result['prb_id']))
+            result['www_api_traceroute_v4'] = 'https://atlas.ripe.net/api/v2/measurements/{}/results/?probe_ids={}&start={}&stop={}'.format(traceroute_msm_map['IPv4-TRACEROUTE'] + str(result['msm_id'])[-2:], str(result['prb_id']), result['timestamp'] - 1800, result['timestamp'] + 1800)
+    except Exception:
+        pass
+
+    try:
+        if result['prb_asn_v6']:
+            result['www_asn_v6'] = 'https://stat.ripe.net/AS{}'.format(str(result['prb_asn_v6']))
+            result['www_api_traceroute_v6_latest'] = 'https://atlas.ripe.net/api/v2/measurements/{}/latest/?probe_ids={}'.format(traceroute_msm_map['IPv6-TRACEROUTE'] + str(result['msm_id'])[-2:], str(result['prb_id']))
+            result['www_api_traceroute_v6'] = 'https://atlas.ripe.net/api/v2/measurements/{}/results/?probe_ids={}&start={}&stop={}'.format(traceroute_msm_map['IPv6-TRACEROUTE'] + str(result['msm_id'])[-2:], str(result['prb_id']), result['timestamp'] - 1800, result['timestamp'] + 1800)
+    except Exception:
+        pass
+
+    results.append(json.dumps(result))
+    if len(results) == chunk_size:
+        for ok, result in streaming_bulk(es, results, chunk_size=chunk_size, index=index, doc_type=doc_type):
+            if not ok:
+                print 'Error indexing results: %s{}' % results
+        del results[:]
+
+def main(args):
+    global index
+    index = args.index
+    global doc_type
+    doc_type = args.msm_type
+
+    load_geo_meta()
+    print "Loaded geo metadata"
+
+    load_probe_meta()
+    print "Loaded connected probe metadata"
+
+    root_server = args.root_server
+    atlas_stream = AtlasStream()
+    atlas_stream.connect()
+
+    channel = "atlas_result"
+    atlas_stream.bind_channel(channel, on_result_response)
+
+    for k, v in dns_msm_map.items():
+        atlas_msm_id = v + root_server_map[root_server]
+        stream_parameters = {"msm": atlas_msm_id}
+        atlas_stream.start_stream(stream_type="result", **stream_parameters)
+        print 'Started msm {}/{} ({}) stream'.format(k, root_server, atlas_msm_id)
+
+    atlas_stream.timeout(seconds='')
+    atlas_stream.disconnect()
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Atlas msm result indexer')
+
+    parser.add_argument('--type','-t', dest="msm_type", default="dns", choices=(['dns']))
+    parser.add_argument('--index','-i', dest="index", required=True)
+    parser.add_argument('--root-server','-s', dest="root_server", choices=('abcdefghijklm'), type=str, required=True)
+
+    args = parser.parse_args()
+    main(args)
+

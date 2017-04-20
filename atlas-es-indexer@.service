@@ -1,0 +1,12 @@
+[Unit]
+Description=Atlas measurement indexer instance (%i)
+After=network-online.target
+PartOf=atlas-es-indexer.target
+
+[Service]
+ExecStart=/opt/atlas-es-indexer/bin/atlas-es-indexer -t dns -i atlas-msms -s %i
+Restart=always
+RestartSec=5s
+
+[Install]
+RequiredBy=atlas-es-indexer.target

@@ -1,0 +1,66 @@
+{
+  "prb_address_v4": "192.0.2.1",
+  "prb_address_v6": null,
+  "af": 4,
+  "header": {
+    "AA": false,
+    "QR": true,
+    "AD": false,
+    "NSCOUNT": 0,
+    "QDCOUNT": 1,
+    "ANCOUNT": 1,
+    "TC": false,
+    "RD": false,
+    "ARCOUNT": 0,
+    "CD": false,
+    "ReturnCode": "NOERROR",
+    "OpCode": "QUERY",
+    "RA": false,
+    "Z": 0,
+    "ID": 19596
+  },
+  "prb_id": 23267,
+  "prb_country": "ES",
+  "result": {
+    "rt": 75.359,
+    "size": 65
+  },
+  "www_probe": "https://atlas.ripe.net/probes/23267/",
+  "src_addr": "192.0.2.1",
+  "proto": "UDP",
+  "question": {
+    "Qclass": "CH",
+    "Qtype": "TXT",
+    "Qname": "hostname.bind."
+  },
+  "answer": {
+    "Name": "hostname.bind.",
+    "Type": "TXT",
+    "TTL": 0,
+    "Data": [
+      "ns1.lv-rix.k.ripe.net"
+    ],
+    "Class": "CH",
+    "RDlength": 22
+  },
+  "type": "dns",
+  "www_asn_v4": "https://stat.ripe.net/AS57656",
+  "msm_id": 10301,
+  "fw": 4760,
+  "timestamp": 1488929124,
+  "prb_geoloc": [
+    -8.6895,
+    42.1705
+  ],
+  "www_api_traceroute_v4_latest": "https://atlas.ripe.net/api/v2/measurements/5001/latest/?probe_ids=23267",
+  "from": "176.58.8.10",
+  "msm_name": "Tdig",
+  "lts": 10,
+  "prb_region": "Southern_Europe",
+  "prb_asn_v6": null,
+  "prb_asn_v4": 57656,
+  "prb_prefix_v4": "192.0.2.0/21",
+  "prb_prefix_v6": null,
+  "dst_addr": "193.0.14.129",
+  "www_api_traceroute_v4": "https://atlas.ripe.net/api/v2/measurements/5001/results/?probe_ids=23267&start=1488927324&stop=1488930924"
+}
